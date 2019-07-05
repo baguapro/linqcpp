@@ -26,7 +26,7 @@ The tests require googletest and the make process will download and build the go
 ## Usage
 All the linqcpp code is inside the linqcpp namespace
 
-Tests data
+### Test data
 ```cpp
 struct person
 {
@@ -46,7 +46,7 @@ struct person
 test_data_.insert(test_data_.end(), {
                                {"John", "Snow", 32, 50000.00},
                                {"Ned", "Stark", 58, 65080.50},
-                               {"Daenerys", "Targaryen", 26, 52090.90},
+                                Matt{"Daenerys", "Targaryen", 26, 52090.90},
                                {"Tyrion", "Lannister", 38, 55000.00},
                                {"Sandor", "Clegane", 42, 42261.80},
                                {"Joffrey", "Baratheon", 19, 31092.60},
@@ -66,11 +66,10 @@ test_data_.insert(test_data_.end(), {
                                {"Walder", "Frey", 72, 35590.00}
                          });
 ```
-### Example 1 - filter collection data with the where clause
-```cpp
-#include <linqcpp>
+All Examples assume *'#include <linqcpp.h>'* and *'using namespace linqcpp'*
 
-using namespace linqcpp;
+### where clause filter
+```cpp
 // By defaut linqcpp will return the results as a vector, later examples will show how to
 // return results in different containers
 auto result = processLinq(
@@ -86,24 +85,9 @@ The *'where'* operator object expects a lambda that will called to filter the da
 The result is returned as a vector by default. In this example the results will
 be a vector of 9 people:
 
-```
-{"Daenerys", "Targaryen", 26, 52090.90},
-{"Joffrey", "Baratheon", 19, 31092.60},
-{"Ramsay", "Bolton", 27, 27044.00},
-{"Margaery", "Tyrell", 24, 32000.00},
-{"Samwell", "Tarly", 23, 18703.70},
-{"Podrick", "Payne", 17, 12800.00},
-{"Grey", "Worm", 23, 27500.90},
-{"Meera", "Reed", 14, 8042.32},
-{"Ser", "Pounce", 5, 1010.00},
-```
-
-### Example 2 - Extract a single subset of data
+### extract a single set of data
 ```cpp
-#include <linqcpp.h>
-
-using namespace linqcpp;
-// result will be a vector of strings
+// result will be a std::vector<std::string>
 auto result = processLinq(
                     extract{[](const person &p) { return p.first_name_; }},
                     from{test_data_}
@@ -114,36 +98,8 @@ The library will figure out at compile time the type returned by the *'extract'*
 there will be no impact to runtime performance. (see [2] for lib and manual code
 discussion)
 
-*'result'* will be a std::vector<std::string> containing:
-```
-/* results are
-"John"
-"Ned"
-"Daenerys"
-"Tyrion"
-"Sandor"
-"Joffrey"
-"Petyr"
-"Khal"
-"Ramsay"
-"Theon"
-"Jorah"
-"Margaery"
-"Samwell"
-"Jagen"
-"Podrick"
-"Davos"
-"Grey"
-"Meera"
-"Ser"
-"Walder"
-```
-
-### Example 3 - Extract multiple points of data from the original operating data
+### extract multiple data points
 ```cpp
-#include <linqcpp.h>
-
-using namespace liqcpp
 // use a std::tuple to extract multiple data points, the result will be
 // std::vector<std::tuple<std::string, int , double>>
 auto result = processLinq(
@@ -153,27 +109,45 @@ auto result = processLinq(
 
 
 ```
-*'result'* as expects is:
-```
-"John",  32, 50000.00
-"Ned", 58, 65080.50
-"Daenerys", 26, 52090.90
-"Tyrion", 38, 55000.00
-"Sandor", 42, 42261.80
-"Joffrey", 19, 31092.60
-"Petyr", 56, 48380.00
-"Khal", 36, 41000.30
-"Ramsay", 27, 27044.00
-"Theon", 30, 21108.10
-"Jorah", 51, 38036.00
-"Margaery", 24, 32000.00
-"Samwell", 23, 18703.70
-"Jagen", 31, 15080.00
-"Podrick", 17, 12800.00
-"Davos", 61, 32650.00
-"Grey", 23, 27500.90
-"Meera", 14, 8042.32
-"Ser", 5, 1010.00
-"Walder", 72, 35590.00
 
+### extract with where filter
+```cpp
+// result will be a std::vector<std::string> of size 9
+auto result = processLinq(
+                extract{[](const person &p) { return p.last_name_; }},
+                from{test_data_},
+                where{[](const person &p){ return p.age_ < 30; }}
+        );
+
+```
+This is basically an combination of [Example 1](#example-1---where-clause-filter) and [Example 2]((#example-2---extract-a-single-subset-of-data)
+
+### extract a pair of data with a where filter
+```cpp
+// result will be a std::vector<std::pair> of size 9
+auto result = processLinq(
+                extract{[](const person &p) { return std::make_pair(p.last_name_, p.salary_); }},
+                from{test_data_},
+                where{[](const person &p) { return (p.age_ > 30 && p.salary_ > 30000.00); }}
+                );
+```
+
+### orderBy with no given predicate
+```cpp
+// order by the data's own operator<
+// results will be a sorted vector
+auto result = processLinq(
+                from{test_data_},
+                orderBy{}
+        );
+```
+
+### orderBy with a given lambda predicate
+```cpp
+// use the given predicate to sort the data
+// results will be a vector sorted by the given predicate
+auto result = processLinq(
+                from{test_data_},
+                orderBy{[](const person &plhs, const person &prhs) { return plhs.first_name_ < prhs.first_name_; }}
+        );
 ```
