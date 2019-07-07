@@ -66,22 +66,19 @@ test_data_.insert(test_data_.end(), {
                                {"Walder", "Frey", 72, 35590.00}
                          });
 ```
-All Examples assume *'#include <linqcpp.h>'* and *'using namespace linqcpp'*
+All Examples assume ```cpp #include <linqcpp.h>``` and ```cpp using namespace linqcpp```
 
 ### where clause filter
 ```cpp
 // By defaut linqcpp will return the results as a vector, later examples will show how to
 // return results in different containers
 auto result = processLinq(
-                    from{std::move(test_data_)},    // expects a copy of the
-data
+                    from{std::move(test_data_)}, // expects a copy of the data
                     where{[](const person &p) { return p.age_ < 30; }}
                 );
 ```
 linqcpp operations are mutating operations, so takes a copy of the operating data. (see [1] for copy discussion)
-
 The *'where'* operator object expects a lambda that will called to filter the data.
-
 The result is returned as a vector by default. In this example the results will
 be a vector of 9 people:
 
@@ -148,6 +145,23 @@ auto result = processLinq(
 // results will be a vector sorted by the given predicate
 auto result = processLinq(
                 from{test_data_},
-                orderBy{[](const person &plhs, const person &prhs) { return plhs.first_name_ < prhs.first_name_; }}
+                orderBy{[](const person &plhs, const person &prhs) 
+                    { return plhs.first_name_ < prhs.first_name_; }}
         );
+```
+The library will check at compile time if a container has its own sort method
+and if a predicate is given for the *orderBy* and genrating the appropriate
+method call at compile time.
+
+### stableUnique with no predicate
+```cpp
+// take a copy of the test data and duplicate the contents onto the end
+auto data = test_data_;
+data.insert(data.end(), test_data_.begin(), test_data_.end());
+
+// results will be a vector matching exactly the test_data
+auto result = processLinq(
+                 from{std::move(data)},
+                 stableUnique{}
+         );
 ```
