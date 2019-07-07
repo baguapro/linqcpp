@@ -66,7 +66,7 @@ test_data_.insert(test_data_.end(), {
                                {"Walder", "Frey", 72, 35590.00}
                          });
 ```
-All Examples assume ```cpp #include <linqcpp.h>``` and ```cpp using namespace linqcpp```
+All Examples assume ```#include <linqcpp.h>``` and ```using namespace linqcpp```
 
 ### where clause filter
 ```cpp
@@ -165,3 +165,29 @@ auto result = processLinq(
                  stableUnique{}
          );
 ```
+
+### stableUnique with predicate
+```cpp
+std::vector<int> int_data{1,2,3,4,5,6,7,8,9,1,2,3,4,5,6,7,8,9,1,2,3,4,5,6,7,8,9};
+
+auto result = processLinq(
+                from{std::move(int_data)},
+                stableUnique{[](int lhs, int rhs) { return lhs==rhs; }}
+        );
+
+```
+Similar to orderBy the library will generate the appropriate method call at
+compile time so there is no runtime branching.
+
+### preSortUnique with predicate
+
+```cpp
+std::vector<int> int_data{1,2,3,4,5,6,7,8,9,1,2,3,4,5,6,7,8,9,1,2,3,4,5,6,7,8,9};
+
+auto result = processLinq(
+                from{std::move(int_data)},
+                stableUnique{[](int lhs, int rhs) { return lhs==rhs; }}
+        );
+
+```
+stableUnique uses ```std::unique``` internally 
