@@ -1,6 +1,7 @@
 Table of Contents
 =================
 
+   * [linqcpp](#linqcpp)
       * [Introduction](#introduction)
       * [License](#license)
       * [Implementation](#implementation)
@@ -22,6 +23,8 @@ Table of Contents
          * [top](#top)
          * [top with where filter](#top-with-where-filter)
          * [top with extract and where operations](#top-with-extract-and-where-operations)
+
+# linqcpp
 
 ## Introduction
 linqcpp is a C++17 implementation of linq, it is designed to be simple and easy to use while trying to follow the C++ mantra of "do not pay for what you don't use". Its operation is designed to follow the order and readability of sql and linq
