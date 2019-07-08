@@ -1,7 +1,30 @@
-# linqcpp
+Table of Contents
+=================
+
+      * [Introduction](#introduction)
+      * [License](#license)
+      * [Implementation](#implementation)
+      * [Build](#build)
+      * [Test.](#test)
+      * [Usage](#usage)
+         * [Test data](#test-data)
+         * [operator processing order](#operator-processing-order)
+         * [extract a single set of data](#extract-a-single-set-of-data)
+         * [extract multiple data points](#extract-multiple-data-points)
+         * [where clause filter](#where-clause-filter)
+         * [extract with where filter](#extract-with-where-filter)
+         * [extract a pair of data with a where filter](#extract-a-pair-of-data-with-a-where-filter)
+         * [orderBy with no given predicate](#orderby-with-no-given-predicate)
+         * [orderBy with a given lambda predicate](#orderby-with-a-given-lambda-predicate)
+         * [stableUnique with no predicate](#stableunique-with-no-predicate)
+         * [stableUnique with predicate](#stableunique-with-predicate)
+         * [preSortUnique with predicate](#presortunique-with-predicate)
+         * [top](#top)
+         * [top with where filter](#top-with-where-filter)
+         * [top with extract and where operations](#top-with-extract-and-where-operations)
 
 ## Introduction
-linqcpp is a C++17 implementation of linq, it is designed to be simple and easy to use while trying to follow the C++ mantra of "do not pay for what you don't use".
+linqcpp is a C++17 implementation of linq, it is designed to be simple and easy to use while trying to follow the C++ mantra of "do not pay for what you don't use". Its operation is designed to follow the order and readability of sql and linq
 
 ## License
 linqcpp is licensed under the terms of the MIT license, see LICENSE.md for details
@@ -66,21 +89,13 @@ test_data_.insert(test_data_.end(), {
                                {"Walder", "Frey", 72, 35590.00}
                          });
 ```
-All Examples assume ```#include <linqcpp.h>``` and ```using namespace linqcpp```
 
-### where clause filter
-```cpp
-// By defaut linqcpp will return the results as a vector, later examples will show how to
-// return results in different containers
-auto result = processLinq(
-                    from{std::move(test_data_)}, // expects a copy of the data
-                    where{[](const person &p) { return p.age_ < 30; }}
-                );
-```
-linqcpp operations are mutating operations, so takes a copy of the operating data. (see [1] for copy discussion)
-The *'where'* operator object expects a lambda that will called to filter the data.
-The result is returned as a vector by default. In this example the results will
-be a vector of 9 people:
+### operator processing order
+linqcpp will always process the *extract* operation last, all operations part from
+the *from* operator will be processed in order from top to bottom or left to
+right, ie. a *where* operation will be processed after an orderBy or top operator if those operators are defined before the where in the process list. See examples below.
+
+All Examples assume ```#include <linqcpp.h>``` and ```using namespace linqcpp```
 
 ### extract a single set of data
 ```cpp
@@ -104,8 +119,21 @@ auto result = processLinq(
                     from{test_data_}
             );
 
-
 ```
+
+### where clause filter
+```cpp
+// By defaut linqcpp will return the results as a vector, later examples will show how to
+// return results in different containers
+auto result = processLinq(
+                    from{std::move(test_data_)}, // expects a copy of the data
+                    where{[](const person &p) { return p.age_ < 30; }}
+                );
+```
+linqcpp operations are mutating operations, so takes a copy of the operating data. (see [1] for copy discussion)
+The *'where'* operator object expects a lambda that will called to filter the data.
+The result is returned as a vector by default. In this example the results will
+be a vector of 9 people:
 
 ### extract with where filter
 ```cpp
@@ -191,3 +219,42 @@ auto result = processLinq(
 
 ```
 stableUnique uses ```std::unique``` internally 
+
+### top 
+
+```cpp
+// top 5 elements in the data
+auto result = processLinq(
+                from{test_data_},
+                top{5}
+            );
+
+```
+
+### top with where filter
+
+```cpp
+auto result = processLinq(
+            from{test_data_},
+            where{[](const person &p) { return p.last_name_ < "S"; }},
+            top{6}
+        );
+
+```
+linqcpp will process the operations from top to bottom (as defined here) so the where operation
+will get processed first then the top 6 of the remaining data will be selected.
+
+### top with extract and where operations
+
+```cpp
+auto result = processLinq(
+            extract{[](const person &p) { return make_tuple(p.first_name_, p.age_, p.last_name_); }},
+            from{test_data_},
+            where{[](const person &p) { return p.salary_ < 30000.0; }},
+            top{3}
+        );
+
+```
+Because the *extract* operation is always processed last, the extraction of the
+tuple data is only performed on the remaining 3 items obtained from the *top*
+operations.
