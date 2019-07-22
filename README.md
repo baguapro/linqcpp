@@ -1,6 +1,7 @@
 Table of Contents
 =================
 
+   * [Table of Contents](#table-of-contents)
    * [linqcpp](#linqcpp)
       * [Introduction](#introduction)
       * [License](#license)
@@ -22,7 +23,20 @@ Table of Contents
          * [preSortUnique with predicate](#presortunique-with-predicate)
          * [top](#top)
          * [top with where filter](#top-with-where-filter)
+         * [top number greater than max available](#top-number-greater-than-max-available)
          * [top with extract and where operations](#top-with-extract-and-where-operations)
+         * [bottom](#bottom)
+         * [bottom with where filter](#bottom-with-where-filter)
+         * [bottom with extract and where operation](#bottom-with-extract-and-where-operation)
+         * [combine top and bottom operation](#combine-top-and-bottom-operation)
+         * [return result as deque](#return-result-as-deque)
+         * [extract a subset of data and convert result to deque](#extract-a-subset-of-data-and-convert-result-to-deque)
+         * [extract data and return results as std::set](#extract-data-and-return-results-as-stdset)
+         * [orderBy operator with asSet](#orderby-operator-with-asset)
+         * [extract data and return results as std::map](#extract-data-and-return-results-as-stdmap)
+         * [orderVy operator with asMap](#ordervy-operator-with-asmap)
+         * [asUnorderedSet](#asunorderedset)
+         * [asUnorderedMap](#asunorderedmap)
 
 # linqcpp
 
@@ -247,6 +261,18 @@ auto result = processLinq(
 linqcpp will process the operations from top to bottom (as defined here) so the where operation
 will get processed first then the top 6 of the remaining data will be selected.
 
+### top number greater than max available
+
+```cpp
+// results will contain 6 elements as there are only 6 elements that satisfy the where filter clause
+auto result = processLinq(
+            from{test_data_},
+            where{[](const person &p) { return (p.last_name_ < "S" && p.age_ > 35); }},
+            top{7}
+        );
+
+```
+
 ### top with extract and where operations
 
 ```cpp
@@ -261,3 +287,171 @@ auto result = processLinq(
 Because the *extract* operation is always processed last, the extraction of the
 tuple data is only performed on the remaining 3 items obtained from the *top*
 operations.
+
+### bottom 
+
+```cpp
+// only interested in the bottom 5 elements
+auto result = processLinq(
+                from{test_data_},
+                bottom{5}
+            );
+
+```
+
+### bottom with where filter
+
+```cpp
+// return the bottom 6 elements after data filtered with the where operation
+auto result = processLinq(
+            from{test_data_},
+            where{[](const person &p) { return p.last_name_ < "S"; }},
+            bottom{6}
+        );
+```
+
+### bottom with extract and where operation
+
+```cpp
+auto result = processLinq(
+            extract{[](const person &p) { return make_tuple(p.first_name_, p.age_, p.last_name_); }},
+            from{test_data_},
+            where{[](const person &p) { return p.salary_ < 30000.0; }},
+            bottom{3}
+        );
+
+```
+Because the *extract* operation is always processed last, the extraction of the
+tuple data is only performed on the remaining 3 items obtained from the *bottom*
+operations.
+
+### combine top and bottom operation
+
+```cpp
+// get the bottom 3 of the top 5 test date
+auto result = processLinq(
+                from{test_data_},
+                top{5},
+                bottom{3}
+            );
+```
+The operation can be reversed, to get the top 3 of the bottom 5
+
+```cpp
+// get the top 3 of the bottom 5
+auto result = processLinq(
+                from{test_data_},
+                bottom{5},
+                top{3}
+            );
+
+```
+
+### return result as deque
+
+```cpp
+// This will basically create a deque from the vector test data
+auto result = processLinq(
+                from{test_data_},
+                asDeque{}
+            );
+
+```
+
+### extract a subset of data and convert result to deque
+
+```cpp
+// extract a subset as a pair and return the result as a deque
+auto result = processLinq(
+                extract{[](const person &p){ return std::make_pair(p.last_name_, p.first_name_); }},
+                from{test_data_},
+                asDeque{}
+            );
+
+```
+As long as the data that is extracted can be stored in a std::deque the lib will
+return the result as a deque without error. As will be seen later then applies
+when returning results as other container types.
+
+### extract data and return results as std::set
+
+```cpp
+// result will be a std::set of std::string's 
+auto result = processLinq(
+                extract{[](const person &p) { return p.last_name_; }},
+                from{test_data_},
+                asSet{}
+            );
+
+```
+The extracted data needs to satisfy the requirements of a std::set, ie. it needs
+to have an accessible operator<
+
+### orderBy operator with asSet
+
+```cpp
+// result will be std::set where the comparison operator is the orderBy lambda
+auto result = processLinq(
+                extract{[](const person &p) { return p.first_name_; }},
+                from{test_data_},
+                orderBy{[](const std::string &plhs, const std::string &prhs) { return plhs < prhs; }},
+                asSet{}
+            );
+
+```
+If An orderBy operator is used as part of the processing with a asSet
+the orderBy lambda will be used as the set's comparison operation.
+This will return a set in the required order, note that elements added
+to the result set outside of the lib will still follow the order set by
+the provided orderBy comparison lambda.
+
+### extract data and return results as std::map
+
+```cpp
+// result will be a std::map<std::string, double> type
+auto result = processLinq(
+                extract{[](const person &p) { return std::make_pair(p.last_name_, p.salary_); }},
+                from{test_data_},
+                asMap{}
+            );
+```
+The extracted data has to be a std::pair type as the data needs to be insertable
+into a std::map.
+
+### orderVy operator with asMap
+
+```cpp
+auto result = processLinq(
+                extract{[](const person &p) { return std::make_pair(p.last_name_, p.salary_); }},
+                from{test_data_},
+                orderBy{[](const std::string &plhs, const std::string &prhs) { return plhs < prhs; }},
+                asMap{}
+            );
+```
+Excatly the same as with the asSet, if an orderBy operator is provided the 
+resulting map will use the orderBy lambda as the comparsion object.
+
+### asUnorderedSet
+
+```cpp
+auto result = processLinq(
+                extract{[](const person &p) { return p.last_name_; }},
+                from{test_data_},
+                asUnorderedSet{}
+            );
+```
+asUnorderedSet operates in the exact same manner as asSet. Ordering makes
+no sense in unordered container so orderBy operators are ignored when used
+with unordered containers.
+
+### asUnorderedMap
+
+```cpp
+auto result = processLinq(
+                extract{[](const person &p) { return std::make_pair(p.last_name_, p.salary_); }},
+                from{test_data_},
+                asUnorderedMap{}
+            );
+```
+Operates in exactly the same manner as asMap except that orderBy operators
+are ignored as ordering makes no sense.

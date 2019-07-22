@@ -68,6 +68,39 @@ TEST_F(LinqTest, topOperationWithWhereFilter)
 
 }
 
+
+TEST_F(LinqTest, topOperationWithWhereFilter_LessThanTopRequested)
+{
+    auto result = processLinq(
+                    from{test_data_},
+                    where{[](const person &p) { return (p.last_name_ < "S" && p.age_ > 35); }},
+                    top{7}
+                );
+
+    // confirm correct size
+    EXPECT_EQ(6, result.size());
+
+    // confirm correct ordering
+    const auto &person0 = result.front();
+    EXPECT_EQ("Lannister", person0.last_name_);
+
+    const auto &person1 = result[1];
+    EXPECT_EQ("Clegane", person1.last_name_);
+
+    const auto &personl = result.back();
+    EXPECT_EQ("Frey", personl.last_name_);
+
+    // confirm filtering correct
+    EXPECT_FALSE(existsInResult(result,[](const person &p) { return p.last_name_ == "Baratheon"; }));
+    EXPECT_TRUE(existsInResult(result,[](const person &p) { return p.last_name_ == "Baelish"; }));
+    EXPECT_TRUE(existsInResult(result,[](const person &p) { return p.last_name_ == "Drogo"; }));
+    EXPECT_FALSE(existsInResult(result,[](const person &p) { return p.last_name_ == "Snow";}));
+    EXPECT_FALSE(existsInResult(result,[](const person &p) { return p.last_name_ == "Stark";}));
+    EXPECT_FALSE(existsInResult(result,[](const person &p) { return p.last_name_ == "Greyjoy";}));
+
+
+}
+
 TEST_F(LinqTest, topOperationExtractAndWhereFilter)
 {
     auto result = processLinq(
