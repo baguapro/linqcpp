@@ -14,7 +14,7 @@ Table of Contents
          * [extract a single set of data](#extract-a-single-set-of-data)
          * [extract multiple data points](#extract-multiple-data-points)
          * [where clause filter](#where-clause-filter)
-         * [extract with where filter](#extract-with-where-filter)
+         * [extractest/testTopOperation.cppt with where filter](#extract-with-where-filter)
          * [extract a pair of data with a where filter](#extract-a-pair-of-data-with-a-where-filter)
          * [orderBy with no given predicate](#orderby-with-no-given-predicate)
          * [orderBy with a given lambda predicate](#orderby-with-a-given-lambda-predicate)
@@ -418,7 +418,7 @@ auto result = processLinq(
 The extracted data has to be a std::pair type as the data needs to be insertable
 into a std::map.
 
-### orderVy operator with asMap
+### orderBy operator with asMap
 
 ```cpp
 auto result = processLinq(

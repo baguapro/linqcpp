@@ -35,12 +35,6 @@ if (CMAKE_VERSION VERSION_LESS 2.8.11)
   include_directories("${gtest_SOURCE_DIR}/include")
 endif()
 
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-	SET(CLANG_SUPPRESS_RET_WARNING_FLAG "-Wreturn-type")
-	SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${CLANG_SUPPRESS_RET_WARNING_FLAG}")
-endif()
-
-
 include_directories(${CMAKE_SOURCE_DIR}/../src)
 
 file(GLOB linqcpp_sources ./*.cpp)

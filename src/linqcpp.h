@@ -693,6 +693,10 @@ namespace linqcpp
         return std::move(data);
     }
 
+    // clang8 is currently not correctly ignoring the other branch of the
+    // constexpr if so disabling the warning for now
+    #pragma clang diagnostic push
+    #pragma clang diagnostic ignored "-Wreturn-type"
     // recursively process the linqcpp operations
     template<typename TT, typename DT, typename FT, typename ...TArgs>
     auto processOperationSequence([[maybe_unused]] const TT &tuple_pack, DT &&data, FT &front, TArgs& ...args)
@@ -712,7 +716,7 @@ namespace linqcpp
         }
 
     }
-
+    #pragma clang diagnostic pop
     
     // process 
     template<typename ...TArgs>
