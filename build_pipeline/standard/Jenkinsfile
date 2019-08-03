@@ -3,33 +3,26 @@ node {
 
         checkout scm
 
-        docker.withServer('tcp://213.168.250.134:4243') {
-        docker.image('jenkins_clang8_image:latest') {
+        stage("Prepare folders") {
+            sh 'export PATH=/clang_8.0.0/bin:$PATH'
+            sh 'export CC=/clang_8.0.0/bin/clang'
+            sh 'export CXX=/clang_8.0.0/bin/clang++'
+            sh 'export LD_LIBRARY_PATH=/clang_8.0.0/lib'
 
-            stage("Prepare folders") {
-                sh 'export PATH=/clang_8.0.0/bin:$PATH'
-                sh 'export CC=/clang_8.0.0/bin/clang'
-                sh 'export CXX=/clang_8.0.0/bin/clang++'
-                sh 'export LD_LIBRARY_PATH=/clang_8.0.0/lib'
-
-                dir('linqcpp/test') {
+            dir('linqcpp/test') {
         
-                    if(fileExists('build')) {
-                        echo 'remove old build dir'
-                        sh 'rm -rf build'
-                    }
-        
-                    sh 'mkdir build'
-                    dir('build') {
-                        sh 'cmake ..'
-                    }
+                if(fileExists('build')) {
+                    echo 'remove old build dir'
+                    sh 'rm -rf build'
                 }
-
+        
+                sh 'mkdir build'
+                dir('build') {
+                    sh 'cmake ..'
+                }
             }
 
         }
-        }
-
     }
 
   // Clean up workspace
