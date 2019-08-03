@@ -10,10 +10,20 @@ node {
         sh 'export CC=/clang_8.0.0/bin/clang'
         sh 'export CXX=/clang_8.0.0/bin/clang++'
         sh 'export LD_LIBRARY_PATH=/clang_8.0.0/lib'
-        sh 'cd linqcpp/test'
-        sh 'mkdir build'
-        sh 'cd build'
-        sh 'cmake ..'
+
+        dir('linqcpp/test') {
+        
+            if(fileExists('build')) {
+                echo 'remove old build dir'
+                sh 'rm -rf build'
+            }
+        
+            sh 'mkdir build'
+            dir('build') {
+                sh 'cmake ..'
+            }
+        }
+
       }
 
    }
