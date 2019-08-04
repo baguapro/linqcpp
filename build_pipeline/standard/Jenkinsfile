@@ -10,7 +10,8 @@ node {
             sh 'export LD_LIBRARY_PATH=/clang_8.0.0/lib'
 
             dir('linqcpp/test') {
-        
+                sh 'ls -lrt'
+
                 if(fileExists('build')) {
                     echo 'remove old build dir'
                     sh 'rm -rf build'
