@@ -4,6 +4,7 @@ node {
         checkout scm
 
         stage("Prepare folders") {
+            sh 'ls -lrt'
             sh 'export PATH=/clang_8.0.0/bin:$PATH'
             sh 'export CC=/clang_8.0.0/bin/clang'
             sh 'export CXX=/clang_8.0.0/bin/clang++'
