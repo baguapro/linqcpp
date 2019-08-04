@@ -3,6 +3,10 @@ node {
 
         checkout scm
 
+        dir('linqcpp') {
+            sh 'git pull'
+        }
+
         stage("Prepare folders") {
             sh 'ls -lrt'
             sh 'export PATH=/clang_8.0.0/bin:$PATH'
