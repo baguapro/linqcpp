@@ -1,7 +1,6 @@
 node {
     stage("Main") {
 
-
         checkout scm
 
         stage("Prepare folders") {
