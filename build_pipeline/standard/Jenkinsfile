@@ -10,7 +10,7 @@ node {
             sh 'export CXX=/clang_8.0.0/bin/clang++'
             sh 'export LD_LIBRARY_PATH=/clang_8.0.0/lib'
 
-            dir('linqcpp/test') {
+            dir('test') {
                 sh 'ls -lrt'
 
                 if(fileExists('build')) {
