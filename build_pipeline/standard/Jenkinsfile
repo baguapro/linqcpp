@@ -1,7 +1,6 @@
 node {
     stage("Main") {
 
-        sh 'rm -rf *'
         checkout scm
 
         stage("Prepare folders") {
