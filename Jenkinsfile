@@ -24,12 +24,12 @@ cmake ..'''
     }
     stage('build') {
       steps {
-        sh 'make'
+        sh 'cd  build make'
       }
     }
     stage('test') {
       steps {
-        sh 'make run_tests'
+        sh 'cd build make run_tests'
       }
     }
   }
