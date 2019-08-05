@@ -1,8 +1,6 @@
 node {
     stage("Main") {
-
         checkout scm
-
         stage("Prepare folders") {
             sh 'ls -lrt'
             sh 'export PATH=/clang_8.0.0/bin:$PATH'
