@@ -11,7 +11,7 @@ pipeline {
         sh '''export PATH=/clang_8.0.0/bin:$PATH
 export CC=/clang_8.0.0/bin/clang
 export CXX=/clang_8.0.0/bin/clang++
-export LD_LIBRARY_PATH=/clang_8.0.0/lib:$LD_LIBRARY_PATH'''
+export LD_LIBRARY_PATH=/clang_8.0.0/lib:$LD_LIBRARY_PATH rm -rf *'''
       }
     }
     stage('configure') {
