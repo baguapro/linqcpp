@@ -34,7 +34,7 @@ Table of Contents
          * [extract data and return results as std::set](#extract-data-and-return-results-as-stdset)
          * [orderBy operator with asSet](#orderby-operator-with-asset)
          * [extract data and return results as std::map](#extract-data-and-return-results-as-stdmap)
-         * [orderVy operator with asMap](#ordervy-operator-with-asmap)
+         * [orderBy operator with asMap](#ordervy-operator-with-asmap)
          * [asUnorderedSet](#asunorderedset)
          * [asUnorderedMap](#asunorderedmap)
 
@@ -50,7 +50,7 @@ linqcpp is licensed under the terms of the MIT license, see LICENSE.md for detai
 The library is implemented in a single header src/linqcpp.h and uses the latest experimental C++17 features and so it is NOT recommended for production use.
 
 ## Build
-linqcpp is a single header library and needs to be built with a C++17 compliant compiler for clang and gcc set the -std=c++17 flag compiler flag
+linqcpp is a single header library and needs to be built with a C++17 compliant compiler, for clang and gcc set the -std=c++17 flag compiler flag
 
 ## Test.
 To build the test go in the test directory and run:
@@ -108,7 +108,7 @@ test_data_.insert(test_data_.end(), {
 ```
 
 ### operator processing order
-linqcpp will always process the *extract* operation last, all operations part from
+linqcpp will always process the *extract* operation last, all operations apart from
 the *from* operator will be processed in order from top to bottom or left to
 right, ie. a *where* operation will be processed after an orderBy or top operator if those operators are defined before the where in the process list. See examples below.
 
@@ -124,8 +124,7 @@ auto result = processLinq(
 
 ```
 The library will figure out at compile time the type returned by the *'extract'* so
-there will be no impact to runtime performance. (see [2] for lib and manual code
-discussion)
+there will be no impact to runtime performance. 
 
 ### extract multiple data points
 ```cpp
@@ -147,7 +146,8 @@ auto result = processLinq(
                     where{[](const person &p) { return p.age_ < 30; }}
                 );
 ```
-linqcpp operations are mutating operations, so takes a copy of the operating data. (see [1] for copy discussion)
+linqcpp operations are mutating operations, so the library takes a copy of the operating data, data that
+is no longer required after the call to linqcpp should be moved.
 The *'where'* operator object expects a lambda that will called to filter the data.
 The result is returned as a vector by default. In this example the results will
 be a vector of 9 people:
@@ -162,7 +162,7 @@ auto result = processLinq(
         );
 
 ```
-This is basically an combination of [Example 1](#example-1---where-clause-filter) and [Example 2]((#example-2---extract-a-single-subset-of-data)
+This is basically an combination of [where clause filter](#where-clause-filter) and [extract a single set of data](#extract-a-single-set-of-data)
 
 ### extract a pair of data with a where filter
 ```cpp
@@ -173,6 +173,8 @@ auto result = processLinq(
                 where{[](const person &p) { return (p.age_ > 30 && p.salary_ > 30000.00); }}
                 );
 ```
+The data thats is extracted is independent of the data that can be used in the where filter, 
+this is in keeping with the features of linq and sql.
 
 ### orderBy with no given predicate
 ```cpp
@@ -183,6 +185,9 @@ auto result = processLinq(
                 orderBy{}
         );
 ```
+If no operator is given then the data is expected to define its own operator< for sorting. Internally
+the library used std::sort if the requested resulting container does not define its own sorting method.
+It will use the containers sorting method if defined (ie std::list), [orderBy operator with asSet](#orderby-operator-with-asset) and [orderBy operator with asMap](#ordervy-operator-with-asmap) explains ordering with std set and map 
 
 ### orderBy with a given lambda predicate
 ```cpp
@@ -194,9 +199,7 @@ auto result = processLinq(
                     { return plhs.first_name_ < prhs.first_name_; }}
         );
 ```
-The library will check at compile time if a container has its own sort method
-and if a predicate is given for the *orderBy* and genrating the appropriate
-method call at compile time.
+The library will use the supplied predicate for sorting overriding the operator< of the given data
 
 ### stableUnique with no predicate
 ```cpp
@@ -370,8 +373,7 @@ auto result = processLinq(
 
 ```
 As long as the data that is extracted can be stored in a std::deque the lib will
-return the result as a deque without error. As will be seen later then applies
-when returning results as other container types.
+return the result as a deque without error.
 
 ### extract data and return results as std::set
 
